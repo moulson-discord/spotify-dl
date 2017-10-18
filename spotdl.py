@@ -9,11 +9,10 @@ from titlecase import titlecase
 from slugify import slugify
 import spotipy
 import pafy
-import urllib.request
+import urllib
 import sys
 import os
 import time
-
 
 def generate_songname(tags):
     """Generate a string of the format '[artist] - [song]' for the given spotify song."""
@@ -69,7 +68,7 @@ def generate_youtube_url(raw_song, tries_remaining=5):
         song = generate_songname(meta_tags)
         search_url = misc.generate_search_url(song, viewsort=True)
 
-    item = urllib.request.urlopen(search_url).read()
+    item = urllib.urlopen(search_url).read()
     # item = unicode(item, 'utf-8')
     items_parse = BeautifulSoup(item, "html.parser")
 
@@ -312,17 +311,7 @@ def grab_list(text_file):
             spotify = spotipy.Spotify(auth=new_token)
             grab_single(raw_song, number=number)
         # detect network problems
-        except (urllib.request.URLError, TypeError, IOError):
-            lines.append(raw_song)
-            # remove the downloaded song from .txt
-            misc.trim_song(text_file)
-            # and append it to the last line in .txt
-            with open(text_file, 'a') as myfile:
-                myfile.write(raw_song + '\n')
-            print('Failed to download song. Will retry after other songs.')
-            # wait 0.5 sec to avoid infinite looping
-            time.sleep(0.5)
-            continue
+        
         except KeyboardInterrupt:
             misc.grace_quit()
         finally:
